@@ -7,12 +7,14 @@ import {
   Post,
   Request,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/createUserDto';
 import { AuthGuard } from '../auth/auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { VerificationEmailDto } from './dto/verificationEmailDto';
 
 @Controller('users')
 export class UsersController {
@@ -26,9 +28,26 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Public()
+  @Post('verification-email')
+  verificationEmail(@Body() verificationEmailDto: VerificationEmailDto) {
+    return this.usersService.verificationEmail(verificationEmailDto);
+  }
+
+  @Public()
+  @Delete('delete-user')
+  deleteUser(@Body() body) {
+    return this.usersService.deleteUser(body.email);
+  }
+
+  @Public()
+  @Get('list-user')
+  listUser() {
+    return this.usersService.listUsers();
   }
 }

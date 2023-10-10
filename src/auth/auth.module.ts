@@ -9,6 +9,8 @@ import { LocalStrategy } from './strategy/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AuthToken, AuthTokenSchema } from './schema/auth_token.schema';
 
 @Module({
   imports: [
@@ -19,6 +21,9 @@ import { JwtAuthGuard } from './jwt-auth.guard';
       signOptions: { expiresIn: '60s' },
     }),
     PassportModule,
+    MongooseModule.forFeature([
+      { name: AuthToken.name, schema: AuthTokenSchema },
+    ]),
   ],
   controllers: [AuthController],
   providers: [

@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { AppConfig } from '../../app.config';
-import * as bcrypt from 'bcrypt';
-import { NextFunction } from 'express';
+import { AppConstants } from 'src/app.constants';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -17,18 +15,6 @@ export class User {
   @Prop({
     type: {
       status: Boolean,
-      expiration: Date,
-    },
-    _id: false,
-    default: { status: true, expiration: Date.now() + 1000 * 60 * 60 * 24 },
-  })
-  locked: {
-    status: boolean;
-    expiration: Date;
-  };
-  @Prop({
-    type: {
-      status: Boolean,
       verification_code: String,
     },
     default: {
@@ -40,15 +26,23 @@ export class User {
     status: boolean;
     verification_code: string;
   };
+  @Prop({
+    _id: false,
+    type: {
+      limit: Number,
+      expired: Date,
+      locked: Boolean,
+    },
+    default: {
+      limit: AppConstants.try_login_limit,
+      locked: false,
+    },
+  })
+  try_login: {
+    limit: number;
+    expired: Date;
+    locked: boolean;
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.pre('save', async function (next: NextFunction) {
-  const saltRound = Number(AppConfig.get('SALT_ROUND'));
-  this.password_hash = await bcrypt.hash(this.password_hash, saltRound);
-  this.email_verified.verification_code = [...Array(4)]
-    .map(() => Math.floor(Math.random() * 10))
-    .join('');
-  next();
-});
